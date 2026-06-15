@@ -323,12 +323,12 @@ def render():
                     st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
                     # Botón para cargar descripción completa + discussions
-                    if st.button("Ver descripción y discusiones", key=f"detail_{ds['ref']}", use_container_width=False):
+                    if st.button("Ver descripción y discusiones", key=f"btn_detail_{ds['ref']}", use_container_width=False):
                         with st.spinner("Obteniendo información del dataset..."):
                             detail = _fetch_kaggle_detail(ds["ref"])
-                        st.session_state[f"detail_{ds['ref']}"] = detail
+                        st.session_state[f"data_detail_{ds['ref']}"] = detail
 
-                    detail = st.session_state.get(f"detail_{ds['ref']}", {})
+                    detail = st.session_state.get(f"data_detail_{ds['ref']}", {})
                     if detail:
                         desc = detail.get("description", "")
                         # Si la API no trae descripción, mostrar aviso con link
@@ -354,12 +354,12 @@ def render():
                             st.markdown(f"<div style='font-size:12px;color:var(--navy-400)'>Ver discusiones en <a href='{kaggle_url}#discussion' target='_blank' style='color:var(--gold)'>la página de Kaggle ↗</a></div>", unsafe_allow_html=True)
 
                     # Archivos CSV
-                    if st.button("Ver archivos CSV", key=f"files_{ds['ref']}", use_container_width=False):
+                    if st.button("Ver archivos CSV", key=f"btn_files_{ds['ref']}", use_container_width=False):
                         with st.spinner("Listando archivos..."):
                             csv_files = _fetch_kaggle_files(ds["ref"])
-                        st.session_state[f"files_{ds['ref']}"] = csv_files
+                        st.session_state[f"data_files_{ds['ref']}"] = csv_files
 
-                    csv_files_list = st.session_state.get(f"files_{ds['ref']}", None)
+                    csv_files_list = st.session_state.get(f"data_files_{ds['ref']}", None)
                     if csv_files_list is not None:
                         if csv_files_list:
                             rows = "".join(f"<tr><td style='padding:5px 10px;color:var(--gold);font-weight:600'>{f['name']}</td><td style='padding:5px 10px;color:var(--navy-300)'>{round(f['size']/1_000_000,2)} MB</td></tr>" for f in csv_files_list)
