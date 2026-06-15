@@ -202,7 +202,7 @@
 .ml-param-label {
   font-size: 13px;
   font-weight: 600;
-  color: var(--navy-800);
+  color: var(--white) !important;
   margin-bottom: 4px;
   display: flex;
   align-items: center;
@@ -213,12 +213,12 @@
   font-weight: 700;
   padding: 2px 7px;
   border-radius: 5px;
-  background: var(--navy-700);
-  color: var(--white);
+  background: var(--gold);
+  color: var(--navy-900);
 }
 .ml-param-badge.not-hyper {
-  background: var(--navy-300);
-  color: var(--navy-800);
+  background: var(--navy-600);
+  color: var(--white);
 }
 
 /* === Metric cards === */
@@ -329,15 +329,43 @@ div[data-testid="stButton"] > button:hover {
   box-shadow: 0 6px 24px rgba(240,165,0,0.35) !important;
 }
 .stSelectbox > div, .stMultiSelect > div {
-  border-color: var(--navy-300) !important;
+  border-color: var(--navy-500) !important;
   border-radius: 10px !important;
+  background: var(--navy-800) !important;
+  color: var(--white) !important;
 }
-.stSlider > div > div > div { background: var(--navy-600) !important; }
+.stSelectbox label, .stMultiSelect label,
+.stNumberInput label, .stTextInput label,
+.stSlider label, .stCheckbox label,
+.stRadio label, .stFileUploader label {
+  color: var(--white) !important;
+}
+/* Input fields */
+.stNumberInput input, .stTextInput input {
+  background: var(--navy-800) !important;
+  color: var(--white) !important;
+  border-color: var(--navy-500) !important;
+  border-radius: 8px !important;
+}
+/* Checkbox text */
+.stCheckbox span { color: var(--white) !important; }
+/* Slider track */
+.stSlider > div > div > div { background: var(--navy-500) !important; }
+/* Slider thumb label */
+.stSlider [data-testid="stTickBar"] { color: var(--navy-300) !important; }
 .stFileUploader {
-  border: 2px dashed var(--navy-300) !important;
+  border: 2px dashed var(--navy-500) !important;
   border-radius: 14px !important;
-  background: var(--navy-50) !important;
+  background: var(--navy-800) !important;
+  color: var(--white) !important;
 }
+/* Expander header text */
+.stExpander summary, .stExpander summary p {
+  color: var(--white) !important;
+}
+/* General text in dark bg */
+p, li, span, div { color: inherit; }
+.stMarkdown p { color: var(--navy-100); }
 .stTabs [data-baseweb="tab-list"] { gap: 4px; border-bottom: 2px solid var(--navy-100); }
 .stTabs [data-baseweb="tab"] {
   border-radius: 8px 8px 0 0;
