@@ -191,6 +191,15 @@ def _load_kaggle_dataset(identifier: str):
             st.session_state.df = df
             st.session_state.applied_transforms = {}
             st.session_state["kaggle_results"] = []
+            # Guardar metadata del dataset para el banner persistente
+            st.session_state["kaggle_dataset_title"] = identifier
+            st.session_state["kaggle_dataset_url"]   = f"https://www.kaggle.com/datasets/{identifier}"
+            # Traer descripción para el banner
+            try:
+                detail = _fetch_kaggle_detail(identifier)
+                st.session_state["kaggle_dataset_desc"] = detail.get("description", "")
+            except Exception:
+                st.session_state["kaggle_dataset_desc"] = ""
             st.success(f"Cargado: **{df.shape[0]:,} filas × {df.shape[1]} columnas** · `{os.path.basename(chosen_file)}`")
             st.rerun()
         except Exception as e:
@@ -263,7 +272,10 @@ def render():
             try:
                 df = load_csv(uploaded.read(), sep=sep, encoding=encoding)
                 st.session_state.df = df
-                st.session_state.applied_transforms = {}  # resetear al cargar nuevo archivo
+                st.session_state.applied_transforms = {}
+                st.session_state["kaggle_dataset_title"] = ""
+                st.session_state["kaggle_dataset_desc"]  = ""
+                st.session_state["kaggle_dataset_url"]   = ""
                 st.success(f"Archivo cargado: {df.shape[0]:,} filas × {df.shape[1]} columnas")
             except Exception as e:
                 st.error(f"Error al leer el archivo: {e}")

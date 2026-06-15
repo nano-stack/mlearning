@@ -95,3 +95,30 @@ def navbar(active: int = -1):
                     )
 
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+
+    # ── Banner de dataset activo ─────────────────────────────────────────────
+    ds_title = st.session_state.get("kaggle_dataset_title", "")
+    ds_desc  = st.session_state.get("kaggle_dataset_desc", "")
+    ds_url   = st.session_state.get("kaggle_dataset_url", "")
+    if ds_title and active >= 2:  # Solo desde pantalla Datos en adelante
+        short_desc = ds_desc[:220] + "..." if len(ds_desc) > 220 else ds_desc
+        link = f'<a href="{ds_url}" target="_blank" style="color:var(--gold);text-decoration:none;font-size:11px;white-space:nowrap">Ver en Kaggle ↗</a>' if ds_url else ""
+        st.markdown(f"""
+        <div style="background:var(--navy-800);border:1px solid var(--navy-600);
+                    border-left:4px solid var(--gold);border-radius:10px;
+                    padding:12px 16px;margin-bottom:12px;display:flex;
+                    align-items:flex-start;gap:14px">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:3px">
+              Dataset activo: {ds_title} {link}
+            </div>
+            <div style="font-size:12px;color:var(--navy-200);line-height:1.5">
+              {short_desc if short_desc else '<span style="color:var(--navy-400)">Sin descripción disponible.</span>'}
+            </div>
+          </div>
+          <div style="flex-shrink:0">
+            <span style="font-size:10px;color:var(--navy-400);cursor:pointer"
+                  onclick="this.parentElement.parentElement.style.display='none'">✕</span>
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
