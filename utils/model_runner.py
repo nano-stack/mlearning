@@ -128,14 +128,14 @@ def animate_linear_regression(X, y, feature_names=None) -> "go.Figure":
             height=460,
             updatemenus=[dict(
                 type="buttons", showactive=False,
-                y=1.08, x=0.0, xanchor="left", yanchor="bottom",
-                direction="right",
+                y=0.5, x=1.13, xanchor="left", yanchor="middle",
+                direction="down",
                 buttons=[
-                    dict(label="▶ Reproducir",
+                    dict(label="▶  Reproducir",
                          method="animate",
                          args=[None, dict(frame=dict(duration=120, redraw=True),
                                          fromcurrent=True, mode="immediate")]),
-                    dict(label="⏸ Pausar",
+                    dict(label="⏸  Pausar",
                          method="animate",
                          args=[[None], dict(frame=dict(duration=0, redraw=False),
                                             mode="immediate")]),
@@ -151,7 +151,7 @@ def animate_linear_regression(X, y, feature_names=None) -> "go.Figure":
                 font=dict(color=NAVY_300),
                 y=-0.18, len=1.0, x=0,
             )],
-            margin=dict(t=80, b=100),
+            margin=dict(t=50, b=100, r=160),
         )
     )
     return fig
