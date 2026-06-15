@@ -13,68 +13,80 @@ from utils.data_processor import (
 from assets.icons.icons import ICON_UPLOAD
 from pages._navbar import navbar
 
-def _load_kaggle_dataset(raw_input: str):
-    """Descarga un dataset de Kaggle y lo carga en session_state.df."""
-    import os, tempfile, re, glob
-
-    # Extraer identificador owner/dataset desde URL completa o string directo
-    match = re.search(r"kaggle\.com/datasets/([^/?#]+/[^/?#]+)", raw_input)
-    if match:
-        identifier = match.group(1)
-    elif re.match(r"^[\w-]+/[\w-]+$", raw_input):
-        identifier = raw_input
-    else:
-        st.error("Formato no reconocido. Usa: `usuario/nombre-dataset` o pega la URL de Kaggle.")
-        return
-
-    # Configurar credenciales desde Streamlit secrets
+def _get_kaggle_api():
+    """Autentica y retorna la API de Kaggle usando secrets de Streamlit."""
+    import os
     try:
-        kg_user = st.secrets["kaggle"]["username"]
-        kg_key  = st.secrets["kaggle"]["key"]
+        os.environ["KAGGLE_USERNAME"] = st.secrets["kaggle"]["username"]
+        os.environ["KAGGLE_KEY"]      = st.secrets["kaggle"]["key"]
     except Exception:
-        st.error("Credenciales de Kaggle no configuradas. Contacta al administrador.")
-        return
-
-    os.environ["KAGGLE_USERNAME"] = kg_user
-    os.environ["KAGGLE_KEY"]      = kg_key
-
+        st.error("Credenciales de Kaggle no configuradas en Streamlit Secrets.")
+        return None
     try:
-        import kaggle  # noqa: F401 — triggers auth via env vars
         from kaggle.api.kaggle_api_extended import KaggleApiExtended
         api = KaggleApiExtended()
         api.authenticate()
+        return api
     except Exception as e:
         st.error(f"Error al autenticar con Kaggle: {e}")
-        return
+        return None
 
+
+def _search_kaggle(query: str):
+    """Busca datasets en Kaggle y retorna lista de dicts."""
+    api = _get_kaggle_api()
+    if api is None:
+        return None
+    try:
+        with st.spinner(f"Buscando '{query}' en Kaggle..."):
+            datasets = api.dataset_list(search=query, file_type="csv", max_size=500_000_000)
+        results = []
+        for ds in datasets[:12]:
+            results.append({
+                "ref":       f"{ds.ref}",
+                "title":     ds.title,
+                "owner":     ds.ownerName if hasattr(ds, "ownerName") else str(ds.ref).split("/")[0],
+                "size":      ds.totalBytes if hasattr(ds, "totalBytes") else 0,
+                "files":     ds.fileCount  if hasattr(ds, "fileCount")  else "?",
+                "downloads": ds.downloadCount if hasattr(ds, "downloadCount") else 0,
+            })
+        if not results:
+            st.info(f"No se encontraron datasets CSV para '{query}'.")
+        return results
+    except Exception as e:
+        st.error(f"Error al buscar en Kaggle: {e}")
+        return None
+
+
+def _load_kaggle_dataset(identifier: str):
+    """Descarga un dataset de Kaggle por su ref (owner/slug) y lo carga en session_state."""
+    import tempfile, glob, os
+    api = _get_kaggle_api()
+    if api is None:
+        return
     with tempfile.TemporaryDirectory() as tmpdir:
-        with st.spinner(f"Descargando `{identifier}` desde Kaggle..."):
+        with st.spinner(f"Descargando `{identifier}`..."):
             try:
                 api.dataset_download_files(identifier, path=tmpdir, unzip=True)
             except Exception as e:
-                st.error(f"Error al descargar dataset: {e}")
+                st.error(f"Error al descargar: {e}")
                 return
-
         csv_files = glob.glob(os.path.join(tmpdir, "**", "*.csv"), recursive=True)
         if not csv_files:
             st.error("El dataset no contiene archivos CSV.")
             return
-
-        if len(csv_files) == 1:
-            chosen_file = csv_files[0]
-        else:
+        # Si hay varios CSV, pedir al usuario que elija
+        chosen_file = csv_files[0]
+        if len(csv_files) > 1:
             names = [os.path.relpath(f, tmpdir) for f in csv_files]
             sel = st.selectbox("El dataset tiene varios archivos — elige uno:", names, key="kaggle_file_sel")
             chosen_file = csv_files[names.index(sel)]
-
         try:
             df = pd.read_csv(chosen_file)
             st.session_state.df = df
             st.session_state.applied_transforms = {}
-            st.success(
-                f"Dataset `{identifier}` cargado: {df.shape[0]:,} filas × {df.shape[1]} columnas "
-                f"· archivo: `{os.path.basename(chosen_file)}`"
-            )
+            st.session_state["kaggle_results"] = []
+            st.success(f"Cargado: **{df.shape[0]:,} filas × {df.shape[1]} columnas** · `{os.path.basename(chosen_file)}`")
             st.rerun()
         except Exception as e:
             st.error(f"Error al leer el CSV: {e}")
@@ -156,23 +168,50 @@ def render():
     with tab_kaggle:
         st.markdown("""
         <div class="ml-info-box">
-            <strong>Carga cualquier dataset de Kaggle directamente.</strong><br>
-            Pega la URL del dataset (ej: <code>https://www.kaggle.com/datasets/uciml/iris</code>)
-            o solo el identificador <code>usuario/nombre-dataset</code>.
+            <strong>Busca datasets de Kaggle directamente.</strong><br>
+            Escribe un término (ej: <code>titanic</code>, <code>housing prices</code>, <code>iris</code>)
+            y selecciona el dataset que quieres cargar.
         </div>
         """, unsafe_allow_html=True)
 
-        kaggle_input = st.text_input(
-            "URL o identificador del dataset",
-            placeholder="https://www.kaggle.com/datasets/uciml/iris",
-            key="kaggle_url_input",
-        )
+        col_search, col_btn = st.columns([3, 1])
+        with col_search:
+            query = st.text_input(
+                "Buscar en Kaggle",
+                placeholder="ej: titanic, iris, house prices...",
+                key="kaggle_search_query",
+                label_visibility="collapsed",
+            )
+        with col_btn:
+            do_search = st.button("Buscar", key="kaggle_search_btn", use_container_width=True)
 
-        if st.button("Descargar desde Kaggle", key="kaggle_download"):
-            if not kaggle_input.strip():
-                st.error("Ingresa una URL o identificador de dataset.")
-            else:
-                _load_kaggle_dataset(kaggle_input.strip())
+        if do_search and query.strip():
+            results = _search_kaggle(query.strip())
+            if results is not None:
+                st.session_state["kaggle_results"] = results
+
+        # Mostrar resultados
+        results = st.session_state.get("kaggle_results", [])
+        if results:
+            st.markdown(f"<div style='font-size:13px;color:var(--navy-300);margin:12px 0 8px'>{len(results)} datasets encontrados</div>", unsafe_allow_html=True)
+            for ds in results:
+                col_info, col_load = st.columns([4, 1])
+                with col_info:
+                    size_mb = round(ds["size"] / 1_000_000, 1) if ds["size"] else "?"
+                    st.markdown(f"""
+                    <div style="background:var(--navy-800);border:1px solid var(--navy-600);
+                                border-radius:10px;padding:12px 16px;margin-bottom:8px">
+                        <div style="font-size:14px;font-weight:700;color:var(--white)">{ds['title']}</div>
+                        <div style="font-size:12px;color:var(--navy-300);margin-top:4px">
+                            {ds['owner']} · {ds['files']} archivo(s) · {size_mb} MB
+                            · ⬇ {ds['downloads']:,} descargas
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                with col_load:
+                    st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+                    if st.button("Cargar", key=f"load_{ds['ref']}", use_container_width=True):
+                        _load_kaggle_dataset(ds["ref"])
 
     # ─── TAB 3: Datasets de ejemplo ─────────────────────────────────────────
     with tab_example:
