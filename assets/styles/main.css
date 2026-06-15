@@ -21,8 +21,16 @@
 
 /* === Global === */
 .stApp {
-  background-color: var(--navy-50);
+  background-color: var(--navy-900) !important;
   font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* Streamlit root containers */
+[data-testid="stAppViewContainer"],
+[data-testid="stMain"],
+[data-testid="block-container"],
+.main {
+  background-color: var(--navy-900) !important;
 }
 
 /* === Hide Streamlit chrome === */
@@ -75,20 +83,20 @@
 
 /* === Cards === */
 .ml-card {
-  background: var(--white);
+  background: var(--navy-800);
   border-radius: 16px;
   padding: 28px;
-  box-shadow: 0 2px 20px rgba(30,58,95,0.08);
-  border: 1px solid var(--navy-100);
+  box-shadow: 0 2px 20px rgba(0,0,0,0.25);
+  border: 1px solid var(--navy-600);
   margin-bottom: 20px;
   transition: box-shadow 0.2s;
 }
-.ml-card:hover { box-shadow: 0 6px 32px rgba(30,58,95,0.14); }
+.ml-card:hover { box-shadow: 0 6px 32px rgba(0,0,0,0.35); }
 
 .ml-card-title {
   font-size: 16px;
   font-weight: 700;
-  color: var(--navy-800);
+  color: var(--white);
   margin-bottom: 6px;
   display: flex;
   align-items: center;
@@ -96,7 +104,7 @@
 }
 .ml-card-sub {
   font-size: 13px;
-  color: var(--text-muted);
+  color: var(--navy-300);
   margin-bottom: 18px;
 }
 
@@ -168,16 +176,16 @@
 
 /* === Tooltip / info boxes === */
 .ml-info-box {
-  background: var(--navy-50);
-  border-left: 4px solid var(--navy-600);
+  background: var(--navy-800);
+  border-left: 4px solid var(--navy-500);
   border-radius: 0 10px 10px 0;
   padding: 14px 18px;
   margin: 10px 0;
   font-size: 13px;
-  color: var(--navy-800);
+  color: var(--navy-100);
   line-height: 1.65;
 }
-.ml-info-box strong { color: var(--navy-700); }
+.ml-info-box strong { color: var(--gold-light); }
 
 .ml-warn-box {
   background: #fffbf0;
@@ -215,21 +223,21 @@
 
 /* === Metric cards === */
 .ml-metric {
-  background: var(--white);
+  background: var(--navy-800);
   border-radius: 14px;
   padding: 20px 18px;
-  border: 1px solid var(--navy-100);
+  border: 1px solid var(--navy-600);
   text-align: center;
 }
 .ml-metric-value {
   font-size: 32px;
   font-weight: 800;
-  color: var(--navy-800);
+  color: var(--gold);
   line-height: 1.1;
 }
 .ml-metric-label {
   font-size: 12px;
-  color: var(--text-muted);
+  color: var(--navy-300);
   margin-top: 4px;
   font-weight: 500;
 }
@@ -291,12 +299,12 @@ div[data-testid="stButton"]:has(button[data-testid*="nav_step"]) button:hover {
 .ml-section-header {
   font-size: 22px;
   font-weight: 800;
-  color: var(--navy-800);
+  color: var(--white);
   margin-bottom: 6px;
 }
 .ml-section-sub {
   font-size: 14px;
-  color: var(--text-muted);
+  color: var(--navy-300);
   margin-bottom: 24px;
 }
 
