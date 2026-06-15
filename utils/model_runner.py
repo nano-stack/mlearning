@@ -64,6 +64,97 @@ def _dark_fig(ncols=1, nrows=1, figsize=None):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+#  ANIMACIONES PLOTLY CON DATOS REALES
+# ══════════════════════════════════════════════════════════════════════════════
+def animate_linear_regression(X, y, feature_names=None) -> "go.Figure":
+    """Anima gradient descent sobre los datos reales del usuario."""
+    X_np = _to_numpy(X)
+    y_np = _to_numpy(y)
+
+    # Usar solo la primera feature para visualización 2D
+    x1 = X_np[:, 0]
+    fname = (feature_names[0] if feature_names else "X")
+
+    x_line = np.linspace(x1.min(), x1.max(), 100)
+
+    # Simular gradient descent manual (learning rate fijo)
+    w, b = 0.0, 0.0
+    lr = 0.01
+    n_frames = 40
+    frames, losses = [], []
+
+    for step in range(n_frames):
+        y_hat = w * x1 + b
+        err = y_hat - y_np
+        loss = float(np.mean(err ** 2))
+        losses.append(loss)
+
+        y_line = w * x_line + b
+
+        frames.append(go.Frame(
+            data=[
+                go.Scatter(x=x1.tolist(), y=y_np.tolist(), mode="markers",
+                           marker=dict(color=PALETTE[0], size=7, opacity=0.7),
+                           name="Datos reales"),
+                go.Scatter(x=x_line.tolist(), y=y_line.tolist(), mode="lines",
+                           line=dict(color=GOLD, width=2.5), name="Recta ajustada"),
+            ],
+            layout=go.Layout(
+                title_text=f"Paso {step+1}/{n_frames} · MSE: {loss:.4f} · w={w:.3f} · b={b:.3f}"
+            ),
+            name=str(step),
+        ))
+        # Actualizar pesos
+        dw = float(np.mean(err * x1))
+        db = float(np.mean(err))
+        w -= lr * dw
+        b -= lr * db
+
+    # Figura inicial
+    fig = go.Figure(
+        data=frames[0].data,
+        frames=frames,
+        layout=go.Layout(
+            title=dict(text=f"Paso 1/{n_frames} · Ajuste de recta sobre datos reales",
+                       font=dict(color=WHITE, size=14)),
+            xaxis=dict(title=fname, color=NAVY_300, gridcolor=NAVY_600,
+                       zeroline=False, showgrid=True),
+            yaxis=dict(title="y", color=NAVY_300, gridcolor=NAVY_600,
+                       zeroline=False, showgrid=True),
+            paper_bgcolor=NAVY_900,
+            plot_bgcolor=NAVY_800,
+            font=dict(color=NAVY_300),
+            legend=dict(bgcolor=NAVY_800, bordercolor=NAVY_600, font=dict(color=WHITE)),
+            height=460,
+            updatemenus=[dict(
+                type="buttons", showactive=False,
+                y=1.15, x=0.5, xanchor="center",
+                buttons=[
+                    dict(label="▶ Reproducir",
+                         method="animate",
+                         args=[None, dict(frame=dict(duration=120, redraw=True),
+                                         fromcurrent=True, mode="immediate")]),
+                    dict(label="⏸ Pausar",
+                         method="animate",
+                         args=[[None], dict(frame=dict(duration=0, redraw=False),
+                                            mode="immediate")]),
+                ],
+                bgcolor=NAVY_800, bordercolor=GOLD, font=dict(color=WHITE),
+            )],
+            sliders=[dict(
+                steps=[dict(method="animate", args=[[str(i)],
+                            dict(mode="immediate", frame=dict(duration=120, redraw=True))],
+                            label=str(i+1)) for i in range(n_frames)],
+                currentvalue=dict(prefix="Paso: ", font=dict(color=WHITE)),
+                bgcolor=NAVY_800, bordercolor=NAVY_600,
+                font=dict(color=NAVY_300),
+            )],
+        )
+    )
+    return fig
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 #  REGRESIÓN LINEAL
 # ══════════════════════════════════════════════════════════════════════════════
 def run_linear_regression(X, y, params: dict) -> dict:

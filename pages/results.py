@@ -222,37 +222,37 @@ def render():
         "Aprende más",
     ])
 
-    # ── Tab 1: Animación Manim ────────────────────────────────────────────────
+    # ── Tab 1: Animación con datos reales ────────────────────────────────────
     with tab_anim:
-        scene_name = ANIM_SCENE_MAP.get(model_key)
-        anim_path  = _get_animation_path(scene_name) if scene_name else None
-
         col_v, col_text = st.columns([2, 1])
         with col_v:
-            if anim_path and anim_path.exists():
-                st.video(str(anim_path), autoplay=True, loop=True)
+            if model_key == "linear_regression":
+                from utils.model_runner import animate_linear_regression
+                X_raw = st.session_state.get("X")
+                y_raw = st.session_state.get("y")
+                feat  = st.session_state.get("feature_cols", [])
+                if X_raw is not None and y_raw is not None:
+                    with st.spinner("Generando animación con tus datos..."):
+                        fig_anim = animate_linear_regression(X_raw, y_raw, feat)
+                    st.plotly_chart(fig_anim, use_container_width=True)
+                else:
+                    st.info("No hay datos disponibles para animar.")
             else:
-                # Intento de render en background con estado
-                if scene_name:
-                    with st.spinner("Renderizando animación Manim... (puede tomar 30–90 segundos la primera vez)"):
-                        ok = _render_animation(scene_name)
-                    if ok:
-                        st.video(str(anim_path), autoplay=True, loop=True)
-                    else:
-                        st.info(
-                            "La animación Manim requiere que Manim esté instalado.\n\n"
-                            "Para instalar: `pip install manim`\n\n"
-                            f"Para renderizar manualmente:\n"
-                            f"```\nmanim -pqm animations/manim_scenes.py {scene_name}\n```"
-                        )
+                # Modelos sin animación Plotly aún: mostrar video pre-renderizado
+                scene_name = ANIM_SCENE_MAP.get(model_key)
+                anim_path  = _get_animation_path(scene_name) if scene_name else None
+                if anim_path and anim_path.exists():
+                    st.video(str(anim_path), autoplay=True, loop=True)
+                else:
+                    st.info("Animación no disponible para este modelo.")
 
         with col_text:
             math_concept = info.get("math_concept", "")
             st.markdown(f"""
             <div class="ml-card">
                 <div class="ml-card-title">Matemática del modelo</div>
-                <div style="font-family:monospace;font-size:13px;color:#1e3a5f;
-                            background:#f0f5fb;padding:16px;border-radius:10px;
+                <div style="font-family:monospace;font-size:13px;color:var(--navy-100);
+                            background:var(--navy-900);padding:16px;border-radius:10px;
                             line-height:1.8;white-space:pre-wrap">{math_concept}</div>
             </div>
             """, unsafe_allow_html=True)
