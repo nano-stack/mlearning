@@ -23,10 +23,9 @@ def _get_kaggle_api():
         st.error("Credenciales de Kaggle no configuradas en Streamlit Secrets.")
         return None
     try:
-        from kaggle.api.kaggle_api_extended import KaggleApiExtended
-        api = KaggleApiExtended()
-        api.authenticate()
-        return api
+        import kaggle
+        kaggle.api.authenticate()
+        return kaggle.api
     except Exception as e:
         st.error(f"Error al autenticar con Kaggle: {e}")
         return None
