@@ -79,29 +79,45 @@ def _kaggle_rest(path: str, params: dict = None):
 
 
 def _fetch_kaggle_detail(ref: str) -> dict:
-    """Obtiene descripción completa y discussions de un dataset via REST."""
-    owner, slug = ref.split("/")
-    detail = _kaggle_rest(f"datasets/{owner}/{slug}") or {}
-    desc = detail.get("description", "") or detail.get("overview", "") or ""
+    """
+    Obtiene descripción completa leyendo el schema.org JSON-LD que Kaggle
+    publica en cada página de dataset para indexación por buscadores.
+    No es scraping — es leer datos estructurados públicos (como Google Dataset Search).
+    """
+    import requests, re, json as _json
+    url = f"https://www.kaggle.com/datasets/{ref}"
+    try:
+        r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=15)
+        m = re.search(r'application/ld\+json[^>]*>(.*?)(?:</script>)', r.text, re.DOTALL)
+        desc = ""
+        keywords = []
+        if m:
+            data = _json.loads(m.group(1).strip())
+            desc = data.get("description", "")
+            keywords = data.get("keywords", [])
+    except Exception:
+        desc, keywords = "", []
 
-    # Discussions via forum topics
+    # Discussions via REST API
     discussions = []
-    disc_data = _kaggle_rest(f"datasets/{owner}/{slug}/discussions", {"sortBy": "hotness", "pageSize": 5})
-    if isinstance(disc_data, list):
-        for d in disc_data[:5]:
-            discussions.append({
-                "title":   d.get("title", ""),
-                "replies": d.get("replyCount", 0),
-                "url":     f"https://www.kaggle.com/datasets/{ref}/discussion/{d.get('id','')}",
-            })
-    elif isinstance(disc_data, dict):
-        for d in (disc_data.get("topics") or disc_data.get("discussions") or [])[:5]:
-            discussions.append({
-                "title":   d.get("title", ""),
-                "replies": d.get("replyCount", d.get("totalReplies", 0)),
-                "url":     f"https://www.kaggle.com/datasets/{ref}/discussion/{d.get('id','')}",
-            })
-    return {"description": desc, "discussions": discussions}
+    owner, slug = ref.split("/")
+    for path in [
+        f"datasets/{owner}/{slug}/discussions",
+        f"datasets/{owner}/{slug}/topics",
+    ]:
+        disc_data = _kaggle_rest(path, {"sortBy": "hotness", "pageSize": 5})
+        if disc_data:
+            items = disc_data if isinstance(disc_data, list) else (disc_data.get("topics") or disc_data.get("discussions") or [])
+            for d in items[:5]:
+                discussions.append({
+                    "title":   d.get("title", ""),
+                    "replies": d.get("replyCount", d.get("totalReplies", 0)),
+                    "url":     f"https://www.kaggle.com/datasets/{ref}/discussion/{d.get('id','')}",
+                })
+            if discussions:
+                break
+
+    return {"description": desc, "keywords": keywords, "discussions": discussions}
 
 
 def _fetch_kaggle_files(ref: str) -> list:
@@ -333,15 +349,15 @@ def render():
                     detail = st.session_state.get(f"data_detail_{ds['ref']}", {})
                     if detail:
                         desc = detail.get("description", "")
-                        # Si la API no trae descripción, mostrar aviso con link
                         if not desc:
-                            st.markdown(f"<div style='font-size:13px;color:var(--navy-300);padding:10px;background:var(--navy-800);border-radius:8px'>La descripción completa solo está disponible en la página de Kaggle. <a href='{kaggle_url}' target='_blank' style='color:var(--gold)'>Abrirla ↗</a></div>", unsafe_allow_html=True)
+                            st.markdown(f"<div style='font-size:13px;color:var(--navy-300);padding:10px;background:var(--navy-800);border-radius:8px'>Este dataset no tiene descripción pública. <a href='{kaggle_url}' target='_blank' style='color:var(--gold)'>Ver en Kaggle ↗</a></div>", unsafe_allow_html=True)
                         else:
                             if lang_code != "en":
                                 with st.spinner("Traduciendo..."):
                                     desc = _translate(desc, lang_code)
                             st.markdown("**Descripción**")
-                            st.markdown(f"<div style='font-size:13px;color:var(--navy-100);line-height:1.7;background:var(--navy-800);padding:14px;border-radius:8px;margin-bottom:8px'>{desc[:3000]}{'...' if len(desc)>3000 else ''}</div>", unsafe_allow_html=True)
+                            # Render markdown nativo de Streamlit (la desc viene en markdown)
+                            st.markdown(f"<div style='background:var(--navy-800);padding:16px;border-radius:8px;margin-bottom:8px'><div style='font-size:13px;color:var(--navy-100);line-height:1.8'>{desc[:4000].replace(chr(10), '<br>')}</div></div>", unsafe_allow_html=True)
 
                         # Discussions
                         discussions = detail.get("discussions", [])
