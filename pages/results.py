@@ -264,13 +264,8 @@ def render():
         else:
             # Gráficos según modelo
             if model_key == "linear_regression":
-                c1, c2 = st.columns(2)
-                with c1:
-                    if "pred" in plots:     st.plotly_chart(plots["pred"],     use_container_width=True)
-                    if "coef" in plots:     st.plotly_chart(plots["coef"],     use_container_width=True)
-                with c2:
-                    if "residuals" in plots: st.plotly_chart(plots["residuals"], use_container_width=True)
-                    if "learning" in plots:  st.plotly_chart(plots["learning"],  use_container_width=True)
+                if "fig" in plots:
+                    st.pyplot(plots["fig"], use_container_width=True)
 
                 # Coeficientes tabla
                 if "coef_df" in result:

@@ -32,9 +32,35 @@ def _to_numpy(arr, force_float=True):
     return raw
 
 
-NAVY = "#1e3a5f"
-GOLD = "#f0a500"
-PALETTE = ["#4a7ec8", "#f0a500", "#2e7d5a", "#c0392b", "#8e44ad", "#1abc9c"]
+NAVY      = "#1e3a5f"
+NAVY_900  = "#0d1b2a"
+NAVY_800  = "#1e3a5f"
+NAVY_600  = "#3d6fba"
+NAVY_300  = "#a8c4e0"
+GOLD      = "#f0a500"
+WHITE     = "#ffffff"
+PALETTE   = ["#4a7ec8", "#f0a500", "#2e7d5a", "#c0392b", "#8e44ad", "#1abc9c"]
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+
+def _dark_fig(ncols=1, nrows=1, figsize=None):
+    """Crea figura matplotlib con tema oscuro de la app."""
+    if figsize is None:
+        figsize = (5.5 * ncols, 4.2 * nrows)
+    fig, axes = plt.subplots(nrows, ncols, figsize=figsize)
+    fig.patch.set_facecolor(NAVY_900)
+    for ax in (axes.flat if hasattr(axes, "flat") else [axes]):
+        ax.set_facecolor(NAVY_800)
+        ax.tick_params(colors=NAVY_300, labelsize=9)
+        ax.xaxis.label.set_color(NAVY_300)
+        ax.yaxis.label.set_color(NAVY_300)
+        ax.title.set_color(WHITE)
+        for spine in ax.spines.values():
+            spine.set_edgecolor(NAVY_600)
+    return fig, axes
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -83,54 +109,39 @@ def run_linear_regression(X, y, params: dict) -> dict:
 def plot_linear_regression(result: dict, feature_names=None) -> dict:
     X_test, y_test, y_pred = result["test"]
     X_train, y_train, y_pred_train = result["train"]
-
-    # 1. Actual vs Predicted
-    fig_pred = go.Figure()
-    fig_pred.add_trace(go.Scatter(
-        x=y_test, y=y_pred, mode="markers",
-        marker=dict(color=PALETTE[0], size=7, opacity=0.75),
-        name="Test"
-    ))
-    mn, mx = min(y_test.min(), y_pred.min()), max(y_test.max(), y_pred.max())
-    fig_pred.add_trace(go.Scatter(
-        x=[mn, mx], y=[mn, mx], mode="lines",
-        line=dict(color=GOLD, dash="dash", width=2), name="Ideal"
-    ))
-    fig_pred.update_layout(
-        title="Predicho vs Real", xaxis_title="Valor Real", yaxis_title="Predicción",
-        plot_bgcolor="white", paper_bgcolor="white",
-        font=dict(color=NAVY),
-    )
-
-    # 2. Residuals
     residuals = y_test - y_pred
-    fig_res = go.Figure()
-    fig_res.add_trace(go.Scatter(
-        x=y_pred, y=residuals, mode="markers",
-        marker=dict(color=PALETTE[0], size=7, opacity=0.7), name="Residuo"
-    ))
-    fig_res.add_hline(y=0, line_color=GOLD, line_dash="dash")
-    fig_res.update_layout(
-        title="Residuos vs Predicción", xaxis_title="Predicción", yaxis_title="Residuo",
-        plot_bgcolor="white", paper_bgcolor="white", font=dict(color=NAVY),
-    )
 
-    # 3. Coefficients
-    coef_df = result["coef_df"]
+    fig, axes = _dark_fig(ncols=2, nrows=2, figsize=(12, 8))
+    ax_pred, ax_res, ax_coef, ax_lc = axes.flat
+
+    # 1. Predicho vs Real
+    ax_pred.scatter(y_test, y_pred, color=PALETTE[0], alpha=0.75, s=50, edgecolors="none")
+    mn, mx = min(y_test.min(), y_pred.min()), max(y_test.max(), y_pred.max())
+    ax_pred.plot([mn, mx], [mn, mx], "--", color=GOLD, linewidth=2, label="Ideal")
+    ax_pred.set_title("Predicho vs Real")
+    ax_pred.set_xlabel("Valor Real")
+    ax_pred.set_ylabel("Predicción")
+    ax_pred.legend(facecolor=NAVY_800, edgecolor=NAVY_600, labelcolor=WHITE, fontsize=8)
+
+    # 2. Residuos
+    ax_res.scatter(y_pred, residuals, color=PALETTE[0], alpha=0.7, s=50, edgecolors="none")
+    ax_res.axhline(0, color=GOLD, linestyle="--", linewidth=1.5)
+    ax_res.set_title("Residuos vs Predicción")
+    ax_res.set_xlabel("Predicción")
+    ax_res.set_ylabel("Residuo")
+
+    # 3. Coeficientes
+    coef_df = result["coef_df"].copy()
     if feature_names and len(feature_names) == len(coef_df):
-        coef_df = coef_df.copy()
         coef_df["Variable"] = feature_names
-    fig_coef = px.bar(
-        coef_df.head(15), x="Coeficiente", y="Variable", orientation="h",
-        color="Coeficiente", color_continuous_scale=["#c0392b", "white", "#2a5298"],
-        title="Importancia de Variables (Coeficientes)",
-    )
-    fig_coef.update_layout(
-        plot_bgcolor="white", paper_bgcolor="white", font=dict(color=NAVY),
-        coloraxis_showscale=False,
-    )
+    coef_df = coef_df.head(15).sort_values("Coeficiente")
+    colors = [PALETTE[3] if v < 0 else PALETTE[0] for v in coef_df["Coeficiente"]]
+    ax_coef.barh(coef_df["Variable"], coef_df["Coeficiente"], color=colors)
+    ax_coef.axvline(0, color=NAVY_300, linewidth=0.8)
+    ax_coef.set_title("Coeficientes del modelo")
+    ax_coef.set_xlabel("Valor")
 
-    # 4. Learning curve
+    # 4. Curva de aprendizaje
     model = result["model"]
     X_all = np.vstack([X_train, X_test])
     y_all = np.concatenate([y_train, y_test])
@@ -138,22 +149,23 @@ def plot_linear_regression(result: dict, feature_names=None) -> dict:
         model, X_all, y_all, cv=5, scoring="r2",
         train_sizes=np.linspace(0.1, 1.0, 10), n_jobs=-1
     )
-    fig_lc = go.Figure()
-    fig_lc.add_trace(go.Scatter(
-        x=train_sizes, y=train_scores.mean(axis=1),
-        mode="lines+markers", name="Train R²", line=dict(color=PALETTE[0])
-    ))
-    fig_lc.add_trace(go.Scatter(
-        x=train_sizes, y=val_scores.mean(axis=1),
-        mode="lines+markers", name="Val R²", line=dict(color=GOLD)
-    ))
-    fig_lc.update_layout(
-        title="Curva de Aprendizaje", xaxis_title="Muestras de entrenamiento",
-        yaxis_title="R²", plot_bgcolor="white", paper_bgcolor="white",
-        font=dict(color=NAVY),
-    )
+    ax_lc.plot(train_sizes, train_scores.mean(axis=1), "o-", color=PALETTE[0], label="Train R²")
+    ax_lc.fill_between(train_sizes,
+        train_scores.mean(axis=1) - train_scores.std(axis=1),
+        train_scores.mean(axis=1) + train_scores.std(axis=1),
+        alpha=0.15, color=PALETTE[0])
+    ax_lc.plot(train_sizes, val_scores.mean(axis=1), "o-", color=GOLD, label="Val R²")
+    ax_lc.fill_between(train_sizes,
+        val_scores.mean(axis=1) - val_scores.std(axis=1),
+        val_scores.mean(axis=1) + val_scores.std(axis=1),
+        alpha=0.15, color=GOLD)
+    ax_lc.set_title("Curva de Aprendizaje")
+    ax_lc.set_xlabel("Muestras de entrenamiento")
+    ax_lc.set_ylabel("R²")
+    ax_lc.legend(facecolor=NAVY_800, edgecolor=NAVY_600, labelcolor=WHITE, fontsize=8)
 
-    return {"pred": fig_pred, "residuals": fig_res, "coef": fig_coef, "learning": fig_lc}
+    fig.tight_layout(pad=2.0)
+    return {"fig": fig}
 
 
 # ══════════════════════════════════════════════════════════════════════════════
