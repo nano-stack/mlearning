@@ -1,0 +1,348 @@
+/* ===== MLearning — Navy & White Design System ===== */
+
+:root {
+  --navy-900: #0d1b2a;
+  --navy-800: #1e3a5f;
+  --navy-700: #2a5298;
+  --navy-600: #3d6fba;
+  --navy-500: #4a7ec8;
+  --navy-400: #6a9fd4;
+  --navy-300: #a8c4e0;
+  --navy-100: #e8f0f8;
+  --navy-50:  #f0f5fb;
+  --white:    #ffffff;
+  --gold:     #f0a500;
+  --gold-light: #ffd166;
+  --success:  #2e7d5a;
+  --error:    #c0392b;
+  --text-primary: #0d1b2a;
+  --text-muted:   #5a7a9f;
+}
+
+/* === Global === */
+.stApp {
+  background-color: var(--navy-50);
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* === Hide Streamlit chrome === */
+#MainMenu, footer, header { visibility: hidden; }
+.block-container { padding-top: 0 !important; max-width: 1200px; }
+
+/* === Navbar === */
+.ml-navbar {
+  background: var(--navy-800);
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 12px rgba(30,58,95,0.18);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.ml-navbar-brand {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--white);
+  letter-spacing: -0.5px;
+}
+.ml-navbar-brand span { color: var(--gold); }
+.ml-navbar-steps {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.ml-step {
+  font-size: 11px;
+  color: var(--navy-300);
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--navy-600);
+  white-space: nowrap;
+}
+.ml-step.active {
+  background: var(--gold);
+  color: var(--navy-900);
+  font-weight: 700;
+  border-color: var(--gold);
+}
+.ml-step.done {
+  background: var(--navy-600);
+  color: var(--white);
+  border-color: var(--navy-600);
+}
+
+/* === Cards === */
+.ml-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 2px 20px rgba(30,58,95,0.08);
+  border: 1px solid var(--navy-100);
+  margin-bottom: 20px;
+  transition: box-shadow 0.2s;
+}
+.ml-card:hover { box-shadow: 0 6px 32px rgba(30,58,95,0.14); }
+
+.ml-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--navy-800);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ml-card-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+}
+
+/* === Algorithm choice cards === */
+.ml-algo-card {
+  background: var(--white);
+  border: 2px solid var(--navy-100);
+  border-radius: 18px;
+  padding: 32px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.22s;
+}
+.ml-algo-card:hover, .ml-algo-card.selected {
+  border-color: var(--navy-700);
+  box-shadow: 0 8px 32px rgba(42,82,152,0.16);
+  transform: translateY(-2px);
+}
+.ml-algo-card.selected { background: var(--navy-50); }
+.ml-algo-card svg { margin-bottom: 14px; }
+.ml-algo-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--navy-800);
+  margin-bottom: 8px;
+}
+.ml-algo-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* === Model chip === */
+.ml-model-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--white);
+  border: 2px solid var(--navy-100);
+  border-radius: 12px;
+  padding: 14px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy-800);
+  transition: all 0.18s;
+  width: 100%;
+  margin-bottom: 10px;
+}
+.ml-model-chip:hover { border-color: var(--navy-600); background: var(--navy-50); }
+.ml-model-chip.selected {
+  border-color: var(--navy-700);
+  background: var(--navy-800);
+  color: var(--white);
+}
+.ml-model-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--navy-100);
+  color: var(--navy-700);
+  margin-left: auto;
+}
+.ml-model-chip.selected .ml-model-tag {
+  background: var(--gold);
+  color: var(--navy-900);
+}
+
+/* === Tooltip / info boxes === */
+.ml-info-box {
+  background: var(--navy-50);
+  border-left: 4px solid var(--navy-600);
+  border-radius: 0 10px 10px 0;
+  padding: 14px 18px;
+  margin: 10px 0;
+  font-size: 13px;
+  color: var(--navy-800);
+  line-height: 1.65;
+}
+.ml-info-box strong { color: var(--navy-700); }
+
+.ml-warn-box {
+  background: #fffbf0;
+  border-left: 4px solid var(--gold);
+  border-radius: 0 10px 10px 0;
+  padding: 14px 18px;
+  margin: 10px 0;
+  font-size: 13px;
+  color: #7a5800;
+  line-height: 1.65;
+}
+
+/* === Param label === */
+.ml-param-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy-800);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ml-param-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: var(--navy-700);
+  color: var(--white);
+}
+.ml-param-badge.not-hyper {
+  background: var(--navy-300);
+  color: var(--navy-800);
+}
+
+/* === Metric cards === */
+.ml-metric {
+  background: var(--white);
+  border-radius: 14px;
+  padding: 20px 18px;
+  border: 1px solid var(--navy-100);
+  text-align: center;
+}
+.ml-metric-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--navy-800);
+  line-height: 1.1;
+}
+.ml-metric-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* === Code block === */
+.ml-code-block {
+  background: var(--navy-900);
+  border-radius: 12px;
+  padding: 20px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 13px;
+  color: #e0e0e0;
+  overflow-x: auto;
+  line-height: 1.7;
+}
+.ml-code-keyword { color: #7ec8e3; }
+.ml-code-string  { color: #f0a500; }
+.ml-code-comment { color: #5a7a9f; }
+.ml-code-number  { color: #a8d8a8; }
+
+/* === Nav back button override === */
+div[data-testid="stButton"] button[kind="secondary"],
+div[data-testid="stButton"]:has(button[data-testid*="nav_back"]) button,
+div[data-testid="stButton"]:has(button[data-testid*="nav_step"]) button {
+  background: transparent !important;
+  color: var(--navy-400) !important;
+  border: 1px solid var(--navy-300) !important;
+  font-size: 12px !important;
+  padding: 5px 10px !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  box-shadow: none !important;
+}
+div[data-testid="stButton"]:has(button[data-testid*="nav_back"]) button:hover,
+div[data-testid="stButton"]:has(button[data-testid*="nav_step"]) button:hover {
+  background: var(--navy-100) !important;
+  color: var(--navy-800) !important;
+  transform: none !important;
+}
+
+/* === Primary button === */
+.ml-btn-primary {
+  background: var(--navy-800);
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  padding: 12px 28px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.ml-btn-primary:hover { background: var(--navy-700); transform: translateY(-1px); }
+
+/* === Section headers === */
+.ml-section-header {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--navy-800);
+  margin-bottom: 6px;
+}
+.ml-section-sub {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+/* === Streamlit widget overrides === */
+.stButton > button {
+  background: var(--navy-800) !important;
+  color: var(--white) !important;
+  border: none !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  padding: 10px 24px !important;
+  transition: all 0.18s !important;
+}
+.stButton > button:hover,
+.stButton > button:focus,
+button[kind="secondary"]:hover,
+div[data-testid="stButton"] > button:hover {
+  background: #f0a500 !important;
+  color: #0d1b2a !important;
+  border-color: #f0a500 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 24px rgba(240,165,0,0.35) !important;
+}
+.stSelectbox > div, .stMultiSelect > div {
+  border-color: var(--navy-300) !important;
+  border-radius: 10px !important;
+}
+.stSlider > div > div > div { background: var(--navy-600) !important; }
+.stFileUploader {
+  border: 2px dashed var(--navy-300) !important;
+  border-radius: 14px !important;
+  background: var(--navy-50) !important;
+}
+.stTabs [data-baseweb="tab-list"] { gap: 4px; border-bottom: 2px solid var(--navy-100); }
+.stTabs [data-baseweb="tab"] {
+  border-radius: 8px 8px 0 0;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.stTabs [aria-selected="true"] {
+  color: var(--navy-800) !important;
+  border-bottom: 2px solid var(--navy-700) !important;
+}
+.stDataFrame { border-radius: 12px; overflow: hidden; }
+.stExpander {
+  border: 1px solid var(--navy-100) !important;
+  border-radius: 10px !important;
+}
+.stProgress > div > div { background: var(--navy-700) !important; }

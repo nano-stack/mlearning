@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# Manim cache (archivos generados, muy pesados)
+assets/Tex/
+assets/texts/
+assets/videos/manim_scenes/
+assets/partial_movie_files/
+
+# Videos renderizados (se regeneran con render_animations.py)
+assets/videos/*.mp4
+
+# Entorno virtual
+venv/
+.env
+*.env
+
+# macOS
+.DS_Store
+.AppleDouble
+
+# Streamlit
+.streamlit/secrets.toml
