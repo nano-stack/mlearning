@@ -13,6 +13,73 @@ from utils.data_processor import (
 from assets.icons.icons import ICON_UPLOAD
 from pages._navbar import navbar
 
+def _load_kaggle_dataset(raw_input: str):
+    """Descarga un dataset de Kaggle y lo carga en session_state.df."""
+    import os, tempfile, re, glob
+
+    # Extraer identificador owner/dataset desde URL completa o string directo
+    match = re.search(r"kaggle\.com/datasets/([^/?#]+/[^/?#]+)", raw_input)
+    if match:
+        identifier = match.group(1)
+    elif re.match(r"^[\w-]+/[\w-]+$", raw_input):
+        identifier = raw_input
+    else:
+        st.error("Formato no reconocido. Usa: `usuario/nombre-dataset` o pega la URL de Kaggle.")
+        return
+
+    # Configurar credenciales desde Streamlit secrets
+    try:
+        kg_user = st.secrets["kaggle"]["username"]
+        kg_key  = st.secrets["kaggle"]["key"]
+    except Exception:
+        st.error("Credenciales de Kaggle no configuradas. Contacta al administrador.")
+        return
+
+    os.environ["KAGGLE_USERNAME"] = kg_user
+    os.environ["KAGGLE_KEY"]      = kg_key
+
+    try:
+        import kaggle  # noqa: F401 — triggers auth via env vars
+        from kaggle.api.kaggle_api_extended import KaggleApiExtended
+        api = KaggleApiExtended()
+        api.authenticate()
+    except Exception as e:
+        st.error(f"Error al autenticar con Kaggle: {e}")
+        return
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        with st.spinner(f"Descargando `{identifier}` desde Kaggle..."):
+            try:
+                api.dataset_download_files(identifier, path=tmpdir, unzip=True)
+            except Exception as e:
+                st.error(f"Error al descargar dataset: {e}")
+                return
+
+        csv_files = glob.glob(os.path.join(tmpdir, "**", "*.csv"), recursive=True)
+        if not csv_files:
+            st.error("El dataset no contiene archivos CSV.")
+            return
+
+        if len(csv_files) == 1:
+            chosen_file = csv_files[0]
+        else:
+            names = [os.path.relpath(f, tmpdir) for f in csv_files]
+            sel = st.selectbox("El dataset tiene varios archivos — elige uno:", names, key="kaggle_file_sel")
+            chosen_file = csv_files[names.index(sel)]
+
+        try:
+            df = pd.read_csv(chosen_file)
+            st.session_state.df = df
+            st.session_state.applied_transforms = {}
+            st.success(
+                f"Dataset `{identifier}` cargado: {df.shape[0]:,} filas × {df.shape[1]} columnas "
+                f"· archivo: `{os.path.basename(chosen_file)}`"
+            )
+            st.rerun()
+        except Exception as e:
+            st.error(f"Error al leer el CSV: {e}")
+
+
 TRANSFORM_OPTIONS = [
     "— sin cambio —",
     "Eliminar columna (drop)",
@@ -50,7 +117,7 @@ def render():
     </div>
     """, unsafe_allow_html=True)
 
-    tab_upload, tab_example = st.tabs(["Cargar CSV", "Dataset de ejemplo"])
+    tab_upload, tab_kaggle, tab_example = st.tabs(["Cargar CSV", "Kaggle", "Dataset de ejemplo"])
 
     # ─── TAB 1: Upload CSV ───────────────────────────────────────────────────
     with tab_upload:
@@ -85,7 +152,29 @@ def render():
                 st.error(f"Error al leer el archivo: {e}")
                 st.info("Prueba cambiando el separador o la codificación.")
 
-    # ─── TAB 2: Datasets de ejemplo ─────────────────────────────────────────
+    # ─── TAB 2: Kaggle ───────────────────────────────────────────────────────
+    with tab_kaggle:
+        st.markdown("""
+        <div class="ml-info-box">
+            <strong>Carga cualquier dataset de Kaggle directamente.</strong><br>
+            Pega la URL del dataset (ej: <code>https://www.kaggle.com/datasets/uciml/iris</code>)
+            o solo el identificador <code>usuario/nombre-dataset</code>.
+        </div>
+        """, unsafe_allow_html=True)
+
+        kaggle_input = st.text_input(
+            "URL o identificador del dataset",
+            placeholder="https://www.kaggle.com/datasets/uciml/iris",
+            key="kaggle_url_input",
+        )
+
+        if st.button("Descargar desde Kaggle", key="kaggle_download"):
+            if not kaggle_input.strip():
+                st.error("Ingresa una URL o identificador de dataset.")
+            else:
+                _load_kaggle_dataset(kaggle_input.strip())
+
+    # ─── TAB 3: Datasets de ejemplo ─────────────────────────────────────────
     with tab_example:
         datasets = get_example_datasets()
         chosen = st.selectbox("Elige un dataset de ejemplo", list(datasets.keys()))
