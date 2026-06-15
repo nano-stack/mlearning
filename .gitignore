@@ -14,8 +14,8 @@ assets/texts/
 assets/videos/manim_scenes/
 assets/partial_movie_files/
 
-# Videos renderizados (se regeneran con render_animations.py)
-assets/videos/*.mp4
+# Videos del cache interno de manim (no los finales)
+assets/videos/manim_scenes/
 
 # Entorno virtual
 venv/
