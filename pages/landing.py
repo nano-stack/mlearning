@@ -403,7 +403,7 @@ def render():
           .logo span { color: #f0a500; }
           .tagline { font-size: 18px; font-weight: 600; color: rgba(255,255,255,0.85); line-height: 1.5; margin-bottom: 10px; }
           .sub { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.75; margin-bottom: 32px; }
-          .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 36px; }
+          .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 28px; }
           .feat {
             background: rgba(255,255,255,0.04);
             border: 1px solid rgba(255,255,255,0.08);
@@ -411,6 +411,12 @@ def render():
           }
           .feat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px; }
           .feat-desc  { font-size: 12px; color: rgba(255,255,255,0.55); line-height: 1.5; }
+          @media (max-width: 500px) {
+            .panel { padding: 24px 16px 16px 16px; }
+            .logo { font-size: 40px; }
+            .tagline { font-size: 16px; }
+            .grid { grid-template-columns: 1fr; }
+          }
           .btn {
             display: inline-block;
             background: #f0a500; color: #0d1b2a;
@@ -447,7 +453,7 @@ def render():
           </div>
         </div>
         """
-        components.html(RIGHT_PANEL, height=500, scrolling=False)
+        components.html(RIGHT_PANEL, height=580, scrolling=False)
 
         if st.button("Comenzar →", key="landing_continue", use_container_width=False):
             st.session_state.page = "select_type"
