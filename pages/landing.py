@@ -411,9 +411,6 @@ def render():
           }
           .feat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px; }
           .feat-desc  { font-size: 12px; color: rgba(255,255,255,0.55); line-height: 1.5; }
-          @media (min-width: 480px) {
-            .grid { grid-template-columns: 1fr 1fr; }
-          }
           .btn {
             display: inline-block;
             background: #f0a500; color: #0d1b2a;
@@ -449,6 +446,16 @@ def render():
             </div>
           </div>
         </div>
+        <script>
+        function fixLayout() {
+          var w = document.documentElement.clientWidth || document.body.clientWidth;
+          var grid = document.querySelector('.grid');
+          if (!grid) return;
+          grid.style.gridTemplateColumns = w >= 500 ? '1fr 1fr' : '1fr';
+        }
+        fixLayout();
+        window.addEventListener('resize', fixLayout);
+        </script>
         """
         components.html(RIGHT_PANEL, height=700, scrolling=False)
 
