@@ -457,12 +457,6 @@ def render():
         window.addEventListener('resize', fixLayout);
         </script>
         """
-        components.html(RIGHT_PANEL, height=700, scrolling=False)
-
-        if st.button("Comenzar →", key="landing_continue", use_container_width=False):
-            st.session_state.page = "select_type"
-            st.rerun()
-
         st.markdown("""
         <style>
         div[data-testid="stButton"] > button {
@@ -474,7 +468,6 @@ def render():
           font-weight: 700 !important;
           padding: 14px 48px !important;
           box-shadow: 0 8px 28px rgba(240,165,0,0.35) !important;
-          margin-top: -8px;
         }
         div[data-testid="stButton"] > button:hover {
           background: #d99400 !important;
@@ -483,6 +476,12 @@ def render():
         }
         </style>
         """, unsafe_allow_html=True)
+
+        if st.button("Comenzar →", key="landing_continue", use_container_width=False):
+            st.session_state.page = "select_type"
+            st.rerun()
+
+        components.html(RIGHT_PANEL, height=700, scrolling=False)
 
     with col_anim:
         components.html(MANIM_ANIMATION, height=560, scrolling=False)
