@@ -431,4 +431,5 @@ def render():
             st.rerun()
 
     with col_anim:
+        st.markdown("<div style='margin-top:-32px'></div>", unsafe_allow_html=True)
         components.html(MANIM_ANIMATION, height=480, scrolling=False)
