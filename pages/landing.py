@@ -371,102 +371,65 @@ draw();
 
 
 def render():
-    # ── Layout: animación izquierda, texto derecha ─────────────────────────
     st.markdown("""
     <style>
     .stApp { background: #0d1b2a !important; }
     #MainMenu, footer, header { visibility: hidden; }
-    .block-container { padding: 0 !important; max-width: 100% !important; }
+    .block-container { padding: 2rem 1rem 1rem 1rem !important; max-width: 960px !important; }
     section[data-testid="stSidebar"] { display:none; }
+
+    /* Texto hero */
+    .lnd-badge {
+      display:inline-block; background:rgba(240,165,0,0.12);
+      border:1px solid rgba(240,165,0,0.35); border-radius:20px;
+      padding:4px 14px; font-size:11px; font-weight:700;
+      color:#f0a500; letter-spacing:1.5px; text-transform:uppercase;
+    }
+    .lnd-logo { font-size:52px; font-weight:900; color:#fff; letter-spacing:-2px; line-height:1.05; margin:10px 0 8px; }
+    .lnd-logo span { color:#f0a500; }
+    .lnd-tag  { font-size:18px; font-weight:600; color:rgba(255,255,255,0.88); margin-bottom:6px; }
+    .lnd-sub  { font-size:13px; color:rgba(255,255,255,0.45); line-height:1.8; margin-bottom:20px; }
+    .lnd-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:20px; }
+    .lnd-feat { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px 14px; }
+    .lnd-feat b { display:block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; margin-bottom:4px; }
+    .lnd-feat p { font-size:12px; color:rgba(255,255,255,0.5); margin:0; line-height:1.5; }
+
+    /* Botón Comenzar */
+    div[data-testid="stButton"] > button {
+      background:#f0a500 !important; color:#0d1b2a !important;
+      border:none !important; border-radius:12px !important;
+      font-size:17px !important; font-weight:700 !important;
+      padding:13px 52px !important;
+      box-shadow:0 6px 24px rgba(240,165,0,0.4) !important;
+      margin-top:4px !important;
+    }
+    div[data-testid="stButton"] > button:hover {
+      background:#d99400 !important;
+      box-shadow:0 10px 32px rgba(240,165,0,0.5) !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
-    col_text, col_anim = st.columns([1, 1.15])
+    # ── Fila superior: texto + animación ────────────────────────────────────
+    col_text, col_anim = st.columns([1, 1.1])
 
     with col_text:
         st.markdown("""
-        <style>
-        .landing-badge {
-          display: inline-block;
-          background: rgba(240,165,0,0.12);
-          border: 1px solid rgba(240,165,0,0.35);
-          border-radius: 20px;
-          padding: 4px 16px;
-          font-size: 11px; font-weight: 700;
-          color: #f0a500; letter-spacing: 1.5px;
-          text-transform: uppercase; margin-bottom: 8px;
-        }
-        .landing-logo {
-          font-size: 54px; font-weight: 900; color: white;
-          letter-spacing: -2px; line-height: 1.05; margin: 8px 0 10px 0;
-        }
-        .landing-logo span { color: #f0a500; }
-        .landing-tagline {
-          font-size: 20px; font-weight: 600;
-          color: rgba(255,255,255,0.9); line-height: 1.4; margin-bottom: 6px;
-        }
-        .landing-sub {
-          font-size: 13px; color: rgba(255,255,255,0.5);
-          line-height: 1.75; margin-bottom: 20px;
-        }
-        .landing-grid {
-          display: grid; grid-template-columns: 1fr 1fr;
-          gap: 10px; margin-bottom: 24px;
-        }
-        .landing-feat {
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 12px; padding: 14px 16px;
-        }
-        .landing-feat-label {
-          font-size: 11px; font-weight: 700;
-          text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px;
-        }
-        .landing-feat-desc { font-size: 12px; color: rgba(255,255,255,0.55); line-height: 1.5; }
-        @media (max-width: 640px) {
-          .landing-logo { font-size: 38px; }
-          .landing-grid { grid-template-columns: 1fr; }
-        }
-        </style>
-
-        <div class="landing-badge">Machine Learning · Visual · Interactivo</div>
-        <div class="landing-logo">ML<span>earning</span></div>
-        <div class="landing-tagline">La app definitiva para aprender Machine Learning</div>
-        <div class="landing-sub">Entrena modelos reales · Visualiza cómo aprenden · Comprende cada hiperparámetro · Genera código listo para usar.</div>
-        <div class="landing-grid">
-          <div class="landing-feat">
-            <div class="landing-feat-label" style="color:#4a7ec8">Visualización</div>
-            <div class="landing-feat-desc">Animaciones matemáticas estilo 3Blue1Brown</div>
-          </div>
-          <div class="landing-feat">
-            <div class="landing-feat-label" style="color:#f0a500">Hiperparámetros</div>
-            <div class="landing-feat-desc">Cada parámetro explicado con efecto y regla práctica</div>
-          </div>
-          <div class="landing-feat">
-            <div class="landing-feat-label" style="color:#2e7d5a">Código</div>
-            <div class="landing-feat-desc">Script Python generado y descargable</div>
-          </div>
-          <div class="landing-feat">
-            <div class="landing-feat-label" style="color:#a8c4e0">Sin API externa</div>
-            <div class="landing-feat-desc">Todo el conocimiento cargado localmente</div>
-          </div>
+        <div class="lnd-badge">Machine Learning · Visual · Interactivo</div>
+        <div class="lnd-logo">ML<span>earning</span></div>
+        <div class="lnd-tag">La app definitiva para aprender Machine Learning</div>
+        <div class="lnd-sub">Entrena modelos reales · Visualiza cómo aprenden<br>Comprende cada hiperparámetro · Genera código listo para usar.</div>
+        <div class="lnd-grid">
+          <div class="lnd-feat"><b style="color:#4a7ec8">Visualización</b><p>Animaciones del proceso de aprendizaje</p></div>
+          <div class="lnd-feat"><b style="color:#f0a500">Hiperparámetros</b><p>Cada parámetro explicado con efecto real</p></div>
+          <div class="lnd-feat"><b style="color:#2e7d5a">Código</b><p>Script Python generado y descargable</p></div>
+          <div class="lnd-feat"><b style="color:#a8c4e0">12 Modelos</b><p>Supervisado y no supervisado</p></div>
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("""
-        <style>
-        div[data-testid="stButton"] > button {
-          background: #f0a500 !important; color: #0d1b2a !important;
-          border: none !important; border-radius: 12px !important;
-          font-size: 17px !important; font-weight: 700 !important;
-          padding: 14px 48px !important;
-          box-shadow: 0 8px 28px rgba(240,165,0,0.35) !important;
-        }
-        </style>""", unsafe_allow_html=True)
-
-        if st.button("Comenzar →", key="landing_continue", use_container_width=False):
+        if st.button("Comenzar →", key="landing_continue"):
             st.session_state.page = "select_type"
             st.rerun()
 
     with col_anim:
-        components.html(MANIM_ANIMATION, height=560, scrolling=False)
+        components.html(MANIM_ANIMATION, height=480, scrolling=False)
