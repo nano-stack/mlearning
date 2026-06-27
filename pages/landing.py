@@ -387,9 +387,16 @@ def render():
     </style>
     """, unsafe_allow_html=True)
 
+    # ── Botón primero — siempre visible ─────────────────────────────────────
+    col_btn, col_sp = st.columns([1, 2])
+    with col_btn:
+        if st.button("Comenzar →", key="landing_continue", use_container_width=True):
+            st.session_state.page = "select_type"
+            st.rerun()
+
     # ── Logo y título ────────────────────────────────────────────────────────
     st.markdown("""
-    <h1 style="font-size:56px;font-weight:900;color:#fff;letter-spacing:-2px;margin:0 0 4px 0">
+    <h1 style="font-size:56px;font-weight:900;color:#fff;letter-spacing:-2px;margin:16px 0 4px 0">
       ML<span style="color:#f0a500">earning</span>
     </h1>
     <p style="font-size:19px;font-weight:600;color:rgba(255,255,255,0.85);margin:0 0 6px 0">
@@ -399,15 +406,6 @@ def render():
       Entrena modelos reales · Visualiza cómo aprenden · Comprende cada hiperparámetro · Genera código listo para usar.
     </p>
     """, unsafe_allow_html=True)
-
-    # ── Botón prominente ─────────────────────────────────────────────────────
-    col_btn, col_sp = st.columns([1, 2])
-    with col_btn:
-        if st.button("Comenzar →", key="landing_continue", use_container_width=True):
-            st.session_state.page = "select_type"
-            st.rerun()
-
-    st.markdown("<div style='height:28px'></div>", unsafe_allow_html=True)
 
     # ── Tarjetas + animación ─────────────────────────────────────────────────
     col_cards, col_anim = st.columns([1, 1.2])
