@@ -377,16 +377,21 @@ def render():
     #MainMenu, footer, header { visibility: hidden; }
     .block-container { padding: 2rem 2rem 2rem 2rem !important; }
     section[data-testid="stSidebar"] { display:none; }
-    /* Alinear columna de animación con la de texto */
-    [data-testid="stHorizontalBlock"]:last-of-type [data-testid="stColumn"]:last-child {
-      margin-top: -60px !important;
-    }
     div[data-testid="stButton"] > button {
       background: #f0a500 !important; color: #0d1b2a !important;
       border: none !important; border-radius: 12px !important;
       font-size: 18px !important; font-weight: 700 !important;
       padding: 14px 0 !important; width: 100% !important;
       box-shadow: 0 6px 24px rgba(240,165,0,0.4) !important;
+    }
+    /* En mobile ocultar la columna de animación */
+    @media (max-width: 768px) {
+      [data-testid="stHorizontalBlock"] [data-testid="stColumn"]:last-child iframe {
+        display: none !important;
+      }
+      [data-testid="stHorizontalBlock"] [data-testid="stColumn"]:last-child {
+        display: none !important;
+      }
     }
     </style>
     """, unsafe_allow_html=True)
